@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  postgres-db-url:
+    image: postgres:15
+    container_name: url-postgres
+    environment:
+      POSTGRES_DB: url_shortener_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_url_data:/var/lib/postgresql/data
+
+  url-app:
+    build: .
+    container_name: url-shortener-api
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres-db-url
+    restart: on-failure
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db-url:5432/url_shortener_db
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: password123
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+
+volumes:
+  postgres_url_data:

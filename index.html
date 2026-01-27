@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>URL Shortener Pro</title>
+    <style>
+        :root { --primary: #6c5ce7; --secondary: #a29bfe; --bg: #dfe6e9; --text: #2d3436; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); display: flex; justify-content: center; padding-top: 50px; }
+        
+        .container { width: 100%; max-width: 600px; }
+        
+        /* Tarjetas */
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        h1 { text-align: center; color: var(--primary); margin-bottom: 5px; }
+        p.subtitle { text-align: center; color: #636e72; margin-bottom: 30px; }
+        
+        /* Inputs y Botones */
+        .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        input { flex: 1; padding: 15px; border: 2px solid #b2bec3; border-radius: 8px; font-size: 16px; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--primary); }
+        button { background-color: var(--primary); color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        button:hover { background-color: #5649c0; transform: translateY(-2px); }
+
+        /* Resultados */
+        .result-box { background: #f1f2f6; padding: 15px; border-radius: 8px; text-align: center; display: none; border: 1px dashed var(--primary); }
+        .result-box a { color: var(--primary); font-weight: bold; font-size: 1.2em; text-decoration: none; }
+        .stats-info { margin-top: 10px; font-size: 0.9em; }
+        .click-count { font-size: 2em; font-weight: bold; color: #e17055; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <div class="card">
+            <h1>✂️ URL Shortener</h1>
+            <p class="subtitle">Haz tus enlaces más cortos y elegantes</p>
+
+            <div class="input-group">
+                <input type="text" id="longUrl" placeholder="Pega aquí tu URL larga (https://...)" />
+                <button onclick="acortar()">Acortar</button>
+            </div>
+
+            <div id="shortResult" class="result-box">
+                <p>¡Listo! Aquí tienes tu enlace:</p>
+                <a href="#" id="shortLink" target="_blank">...</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📊 Analítica</h2>
+            <p>Comprueba cuántos clicks tiene tu enlace</p>
+            
+            <div class="input-group">
+                <input type="text" id="shortCodeInput" placeholder="Introduce el código (ej: aX9j21)" />
+                <button onclick="verStats()" style="background-color: var(--secondary);">Ver Info</button>
+            </div>
+
+            <div id="statsResult" class="result-box">
+                <p>Visitas totales:</p>
+                <div class="click-count" id="clickCount">0</div>
+                <p class="stats-info">Destino: <span id="longDest">...</span></p>
+                <p class="stats-info">Creado: <span id="createdDate">...</span></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080';
+
+        // FUNCIÓN 1: ACORTAR URL
+        async function acortar() {
+            const urlInput = document.getElementById('longUrl').value;
+            const resultBox = document.getElementById('shortResult');
+            const linkElement = document.getElementById('shortLink');
+
+            if (!urlInput) { alert("Por favor, escribe una URL"); return; }
+
+            try {
+                const response = await fetch(`${API_BASE}/shorten`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: urlInput })
+                });
+
+                if (response.ok) {
+                    const shortUrl = await response.text(); // El backend devuelve texto plano (string)
+                    linkElement.href = shortUrl;
+                    linkElement.textContent = shortUrl;
+                    resultBox.style.display = 'block';
+                } else {
+                    alert("Error al acortar. Revisa la consola.");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Error de conexión. ¿Está Docker encendido?");
+            }
+        }
+
+        // FUNCIÓN 2: VER ESTADÍSTICAS
+        async function verStats() {
+            // Limpiamos la URL si el usuario pegó la URL entera en vez de solo el código
+            let code = document.getElementById('shortCodeInput').value;
+            if (code.includes('/')) {
+                const partes = code.split('/');
+                code = partes[partes.length - 1]; // Cogemos lo último después de la barra
+            }
+
+            const resultBox = document.getElementById('statsResult');
+
+            if (!code) { alert("Escribe un código"); return; }
+
+            try {
+                const response = await fetch(`${API_BASE}/stats/${code}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('clickCount').textContent = data.clicks;
+                    document.getElementById('longDest').textContent = data.longUrl.substring(0, 40) + '...';
+                    document.getElementById('createdDate').textContent = new Date(data.createdDate).toLocaleDateString();
+                    resultBox.style.display = 'block';
+                } else {
+                    alert("Código no encontrado");
+                    resultBox.style.display = 'none';
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Error de conexión");
+            }
+        }
+    </script>
+</body>
+</html>
