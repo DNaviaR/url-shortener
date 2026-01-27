@@ -54,16 +54,13 @@ Un servicio de acortamiento de URLs (estilo Bit.ly) robusto y escalable. Constru
 ### 🧪 Ejemplo de uso
 
 **1. Acortar un enlace:**
-```bash
 POST http://localhost:8080/shorten
 {
   "url": "[https://www.youtube.com/watch?v=dQw4w9WgXcQ](https://www.youtube.com/watch?v=dQw4w9WgXcQ)"
 }
 # Respuesta: http://localhost:8080/aX9j21
-2. Ver estadísticas:
 
-Bash
-
+**2. Ver estadísticas:**
 GET http://localhost:8080/stats/aX9j21
 # Respuesta:
 {
@@ -73,3 +70,4 @@ GET http://localhost:8080/stats/aX9j21
   "clicks": 5,
   "createdDate": "2026-01-27T10:00:00"
 }
+
