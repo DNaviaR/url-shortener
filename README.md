@@ -26,7 +26,7 @@ Un servicio de acortamiento de URLs (estilo Bit.ly) robusto y escalable. Constru
 
 1.  **Clonar repositorio:**
     ```bash
-    git clone [https://github.com/TU_USUARIO/url-shortener.git](https://github.com/TU_USUARIO/url-shortener.git)
+    git clone [https://github.com/DNaviaR/url-shortener](https://github.com/DNaviaR/url-shortener)
     cd url-shortener
     ```
 
@@ -73,5 +73,6 @@ GET http://localhost:8080/stats/aX9j21
   "clicks": 5,
   "createdDate": "2026-01-27T10:00:00"
 }
+
 
 
