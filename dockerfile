@@ -13,17 +13,11 @@ COPY . .
 RUN mvn clean package -DskipTests
 
 # --- ETAPA 2: Ejecución (RUN) ---
-# Usamos una imagen ligera de Java (sin Maven, para que pese menos)
+# Usamos una imagen ligera de Java (sin Maven, para que pese menos).
 FROM eclipse-temurin:17-jdk-alpine
-
 WORKDIR /app
-
-# Copiamos SOLO el archivo .jar desde la Etapa 1 (build)
-# Fíjate en el "--from=build"
 COPY --from=build /app/target/*.jar app.jar
 
-# Le decimos qué puerto vamos a usar (informativo)
-EXPOSE 8080
-
-# Arrancamos la app
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# TRUCO: Pasamos el puerto como argumento directo de Java
+# Esto sobreescribe cualquier configuración.
+CMD ["java", "-Dserver.port=${PORT}", "-jar", "app.jar"]
