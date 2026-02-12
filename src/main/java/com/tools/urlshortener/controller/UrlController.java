@@ -33,7 +33,7 @@ public class UrlController {
     }
 
     // 2. Redireccionar (La magia)
-    @GetMapping("/{code}")
+    @GetMapping("/{code:[a-zA-Z0-9]+}")
     public ResponseEntity<?> redirect(@PathVariable String code) {
         try {
             // Intentamos buscar la URL
