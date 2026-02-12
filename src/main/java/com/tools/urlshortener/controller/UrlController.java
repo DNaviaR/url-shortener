@@ -33,15 +33,19 @@ public class UrlController {
     }
 
     // 2. Redireccionar (La magia)
-    @GetMapping("/{shortCode}")
-    public ResponseEntity<Void> redirect(@PathVariable String shortCode) {
-        String originalUrl = urlService.getOriginalUrl(shortCode);
-
-        // Devolvemos un 302 (Found) y en la cabecera "Location" ponemos la URL destino.
-        // El navegador leerá esto y cambiará de página automáticamente.
-        return ResponseEntity.status(HttpStatus.FOUND)
-                .location(URI.create(originalUrl))
-                .build();
+    @GetMapping("/{code}")
+    public ResponseEntity<?> redirect(@PathVariable String code) {
+        try {
+            // Intentamos buscar la URL
+            String originalUrl = urlService.getOriginalUrl(code);
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .location(URI.create(originalUrl))
+                    .build();
+        } catch (RuntimeException e) {
+            // Si no existe (ej: es favicon.ico o index.html), devolvemos 404 Not Found
+            // en lugar de explotar con un 500.
+            return ResponseEntity.notFound().build();
+        }
     }
 
     // 3. Ver estadísticas (Cuántos clicks lleva)
